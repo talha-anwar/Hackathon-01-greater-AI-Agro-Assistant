@@ -139,18 +139,23 @@ class ChatBot:
             # Check if it's an authentication error
             if "authentication" in str(e).lower() or "api key" in str(e).lower():
                 print("Authentication error detected, switching to rule-based mode")
+                self._init_rule_based()
                 self.model_type = 'rule_based'
-                return "I'm having trouble with my API configuration, but I can still chat with you! " + self._get_rule_based_response(message)
+                return "I'm having trouble with my API configuration. Let me help you with my built-in responses instead!"
             elif "quota" in str(e).lower() or "billing" in str(e).lower():
                 print("Quota limit reached, switching to rule-based mode")
+                self._init_rule_based()
                 self.model_type = 'rule_based'
-                return "I've reached my OpenAI usage limit, but I can still chat with you using my built-in responses! " + self._get_rule_based_response(message)
+                return "I've reached my usage limit for now. Don't worry though - I can still chat with you using my built-in responses!"
             elif "rate limit" in str(e).lower():
                 print("Rate limit detected, switching to rule-based mode temporarily")
-                return "I'm being rate limited, but here's my response: " + self._get_rule_based_response(message)
+                self._init_rule_based()
+                return "I'm being rate limited at the moment. Here's my response using built-in knowledge: " + self._get_rule_based_response(message)
             else:
                 print("Unknown error, falling back to rule-based response")
-                return "I encountered an issue, but I can still help you! " + self._get_rule_based_response(message)
+                self._init_rule_based()
+                self.model_type = 'rule_based'
+                return "I'm experiencing some technical difficulties, but I can still help you! " + self._get_rule_based_response(message)
     
     def _get_rule_based_response(self, message: str) -> str:
         """
