@@ -124,7 +124,8 @@ class ChatBot:
                     {"role": "user", "content": message}
                 ],
                 max_tokens=150,
-                temperature=0.7
+                temperature=0.7,
+                timeout=30
             )
             result = response.choices[0].message.content.strip()
             print(f"OpenAI response received: {result[:50]}...")
@@ -133,8 +134,17 @@ class ChatBot:
         except Exception as e:
             print(f"OpenAI API error: {e}")
             print(f"Error type: {type(e).__name__}")
-            # Fallback to rule-based response
-            return self._get_rule_based_response(message)
+            print(f"Full error details: {str(e)}")
+            
+            # Check if it's an authentication error
+            if "authentication" in str(e).lower() or "api key" in str(e).lower():
+                return "I'm having trouble with my API configuration. Please check that the OpenAI API key is set correctly."
+            elif "quota" in str(e).lower() or "billing" in str(e).lower():
+                return "I'm currently unable to access the OpenAI API due to quota limits. Please try again later."
+            elif "rate limit" in str(e).lower():
+                return "I'm being rate limited by the OpenAI API. Please try again in a moment."
+            else:
+                return f"I encountered an error while trying to process your request: {str(e)[:100]}..."
     
     def _get_rule_based_response(self, message: str) -> str:
         """
