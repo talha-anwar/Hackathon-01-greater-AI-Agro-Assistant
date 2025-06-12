@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <header class="chat-header">
+            <h1>🤖 AI Chatbot</h1>
+            <p>Ask me anything or upload an image!</p>
+        </header>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                <div class="message-content">
+                    <strong>Bot:</strong> Hello! I'm your AI assistant. How can I help you today?
+                </div>
+                <div class="message-time"></div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <form id="chatForm" enctype="multipart/form-data">
+                <div class="input-row">
+                    <input type="text" id="messageInput" placeholder="Type your message here..." required>
+                    <label for="imageInput" class="file-label" title="Upload Image">
+                        📷
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    </label>
+                    <button type="submit" id="sendButton">Send</button>
+                </div>
+                <div id="imagePreview" class="image-preview" style="display: none;">
+                    <img id="previewImg" src="" alt="Preview">
+                    <button type="button" id="removeImage" class="remove-btn">×</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="loadingIndicator" class="loading" style="display: none;">
+        <div class="spinner"></div>
+        <span>Thinking...</span>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

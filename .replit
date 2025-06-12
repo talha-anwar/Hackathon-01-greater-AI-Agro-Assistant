@@ -12,3 +12,19 @@ language = "python3"
 [deployment]
 run = ["python3", "main.py"]
 deploymentTarget = "cloudrun"
+
+[workflows]
+runButton = "Run Chatbot"
+
+[[workflows.workflow]]
+name = "Run Chatbot"
+author = 3201221
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pip install -r requirements.txt"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python app.py"

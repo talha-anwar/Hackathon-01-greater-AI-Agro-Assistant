@@ -1,0 +1,22 @@
+
+Flask==2.3.3
+Flask-CORS==4.0.0
+Werkzeug==2.3.7
+
+# Optional dependencies for future model integrations
+# Uncomment as needed:
+
+# For OpenAI integration (if free tier becomes available)
+# openai==1.3.0
+
+# For HuggingFace transformers (local models)
+# transformers==4.35.0
+# torch==2.1.0
+
+# For image processing (when implementing image analysis)
+# Pillow==10.1.0
+# opencv-python==4.8.1.78
+
+# For alternative AI models
+# requests==2.31.0  # For API calls to free AI services
+# anthropic==0.7.0  # If Claude has free tier
