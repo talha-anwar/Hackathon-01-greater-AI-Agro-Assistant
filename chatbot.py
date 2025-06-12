@@ -138,13 +138,19 @@ class ChatBot:
             
             # Check if it's an authentication error
             if "authentication" in str(e).lower() or "api key" in str(e).lower():
-                return "I'm having trouble with my API configuration. Please check that the OpenAI API key is set correctly."
+                print("Authentication error detected, switching to rule-based mode")
+                self.model_type = 'rule_based'
+                return "I'm having trouble with my API configuration, but I can still chat with you! " + self._get_rule_based_response(message)
             elif "quota" in str(e).lower() or "billing" in str(e).lower():
-                return "I'm currently unable to access the OpenAI API due to quota limits. Please try again later."
+                print("Quota limit reached, switching to rule-based mode")
+                self.model_type = 'rule_based'
+                return "I've reached my OpenAI usage limit, but I can still chat with you using my built-in responses! " + self._get_rule_based_response(message)
             elif "rate limit" in str(e).lower():
-                return "I'm being rate limited by the OpenAI API. Please try again in a moment."
+                print("Rate limit detected, switching to rule-based mode temporarily")
+                return "I'm being rate limited, but here's my response: " + self._get_rule_based_response(message)
             else:
-                return f"I encountered an error while trying to process your request: {str(e)[:100]}..."
+                print("Unknown error, falling back to rule-based response")
+                return "I encountered an issue, but I can still help you! " + self._get_rule_based_response(message)
     
     def _get_rule_based_response(self, message: str) -> str:
         """
