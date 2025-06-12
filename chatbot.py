@@ -1,6 +1,6 @@
 
 import os
-import openai
+from openai import OpenAI
 from typing import Optional, List
 import random
 import re
@@ -30,11 +30,13 @@ class ChatBot:
     def _init_openai(self):
         """Initialize OpenAI API client"""
         try:
-            openai.api_key = os.environ['OPENAI_API_KEY']
-            if not openai.api_key:
+            api_key = os.environ['OPENAI_API_KEY']
+            if not api_key:
                 print("Warning: OPENAI_API_KEY not found. Falling back to rule-based responses.")
                 self._init_rule_based()
                 self.model_type = 'rule_based'
+            else:
+                self.client = OpenAI(api_key=api_key)
         except Exception as e:
             print(f"OpenAI initialization error: {e}. Falling back to rule-based.")
             self._init_rule_based()
@@ -108,7 +110,7 @@ class ChatBot:
             str: GPT-3.5 response
         """
         try:
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a helpful, friendly AI assistant. Be conversational and engaging."},
