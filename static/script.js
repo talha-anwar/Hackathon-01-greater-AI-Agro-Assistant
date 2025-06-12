@@ -1,111 +1,131 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const chatForm = document.getElementById('chatForm');
-    const messageInput = document.getElementById('messageInput');
-    const chatMessages = document.getElementById('chatMessages');
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    const removeImageBtn = document.getElementById('removeImage');
-    const loadingIndicator = document.getElementById('loadingIndicator');
+class ChatBot {
+    constructor() {
+        this.chatMessages = document.getElementById('chatMessages');
+        this.chatForm = document.getElementById('chatForm');
+        this.messageInput = document.getElementById('messageInput');
+        this.imageInput = document.getElementById('imageInput');
+        this.imagePreview = document.getElementById('imagePreview');
+        this.previewImg = document.getElementById('previewImg');
+        this.removeImageBtn = document.getElementById('removeImage');
+        this.sendButton = document.getElementById('sendButton');
+        this.loadingIndicator = document.getElementById('loadingIndicator');
 
-    let selectedFile = null;
+        this.setupEventListeners();
+    }
 
-    // Handle image selection
-    imageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
+    setupEventListeners() {
+        this.chatForm.addEventListener('submit', (e) => this.handleSubmit(e));
+        this.imageInput.addEventListener('change', (e) => this.handleImageSelect(e));
+        this.removeImageBtn.addEventListener('click', () => this.removeImage());
+
+        // Auto-resize input
+        this.messageInput.addEventListener('input', () => {
+            this.messageInput.style.height = 'auto';
+            this.messageInput.style.height = this.messageInput.scrollHeight + 'px';
+        });
+    }
+
+    handleImageSelect(event) {
+        const file = event.target.files[0];
         if (file) {
-            selectedFile = file;
             const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                imagePreview.style.display = 'block';
+            reader.onload = (e) => {
+                this.previewImg.src = e.target.result;
+                this.imagePreview.style.display = 'block';
             };
             reader.readAsDataURL(file);
         }
-    });
+    }
 
-    // Remove selected image
-    removeImageBtn.addEventListener('click', function() {
-        selectedFile = null;
-        imageInput.value = '';
-        imagePreview.style.display = 'none';
-    });
+    removeImage() {
+        this.imageInput.value = '';
+        this.imagePreview.style.display = 'none';
+        this.previewImg.src = '';
+    }
 
-    // Handle form submission
-    chatForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    async handleSubmit(event) {
+        event.preventDefault();
 
-        const message = messageInput.value.trim();
+        const message = this.messageInput.value.trim();
         if (!message) return;
 
         // Add user message to chat
-        addMessage(message, 'user');
-        messageInput.value = '';
+        this.addMessage(message, 'user');
 
-        // Show loading indicator
-        showLoading(true);
+        // Clear input
+        this.messageInput.value = '';
+        this.messageInput.style.height = 'auto';
+
+        // Show loading
+        this.showLoading(true);
 
         try {
             // Prepare form data
             const formData = new FormData();
             formData.append('message', message);
 
-            if (selectedFile) {
-                formData.append('image', selectedFile);
+            // Add image if selected
+            if (this.imageInput.files[0]) {
+                formData.append('image', this.imageInput.files[0]);
+                this.removeImage(); // Clear image after sending
             }
 
-            // Send request to backend
+            // Send to backend
+            console.log('Sending message to backend:', message);
             const response = await fetch('/chat', {
                 method: 'POST',
                 body: formData
             });
 
-            const data = await response.json();
+            console.log('Response status:', response.status);
 
-            if (response.ok) {
-                addMessage(data.response, 'bot');
-            } else {
-                addMessage(`Error: ${data.error || 'Unknown error occurred'}`, 'bot');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            const data = await response.json();
+            console.log('Response data:', data);
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            // Add bot response to chat
+            this.addMessage(data.response, 'bot');
 
         } catch (error) {
             console.error('Error:', error);
-            addMessage('Sorry, I encountered an error while processing your request. Please try again.', 'bot');
+            this.addMessage('Sorry, I encountered an error. Please try again.', 'bot');
         } finally {
-            showLoading(false);
-            // Clear image after sending
-            if (selectedFile) {
-                removeImageBtn.click();
-            }
+            this.showLoading(false);
         }
-    });
+    }
 
-    function addMessage(message, sender) {
+    addMessage(content, sender) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}-message`;
 
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-        contentDiv.innerHTML = `<strong>${sender === 'user' ? 'You' : 'Bot'}:</strong> ${message}`;
+        const now = new Date();
+        const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-        const timeDiv = document.createElement('div');
-        timeDiv.className = 'message-time';
-        timeDiv.textContent = new Date().toLocaleTimeString();
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <strong>${sender === 'user' ? 'You' : 'Bot'}:</strong> ${content}
+            </div>
+            <div class="message-time">${timeString}</div>
+        `;
 
-        messageDiv.appendChild(contentDiv);
-        messageDiv.appendChild(timeDiv);
-        chatMessages.appendChild(messageDiv);
-
-        // Scroll to bottom
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        this.chatMessages.appendChild(messageDiv);
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
 
-    function showLoading(show) {
-        if (loadingIndicator) {
-            loadingIndicator.style.display = show ? 'block' : 'none';
-        }
+    showLoading(show) {
+        this.loadingIndicator.style.display = show ? 'flex' : 'none';
+        this.sendButton.disabled = show;
     }
+}
 
-    // Focus on input when page loads
-    messageInput.focus();
+// Wait for DOM to load
+document.addEventListener('DOMContentLoaded', function() {
+    const chatbot = new ChatBot();
 });

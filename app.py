@@ -37,6 +37,11 @@ def chat():
     Or multipart form data with optional image file(s)
     Returns JSON: {"response": "bot response"}
     """
+    print(f"=== Received chat request ===")
+    print(f"Request method: {request.method}")
+    print(f"Content type: {request.content_type}")
+    print(f"Is JSON: {request.is_json}")
+    
     try:
         # Handle both JSON and form data
         if request.is_json:
@@ -63,8 +68,14 @@ def chat():
         if not user_message.strip():
             return jsonify({'error': 'Message cannot be empty'}), 400
         
+        print(f"User message: {user_message}")
+        print(f"Image paths: {image_paths}")
+        print(f"Chatbot model type: {chatbot.model_type}")
+        
         # Get chatbot response with image support
         response = chatbot.get_response(user_message, image_paths if image_paths else None)
+        
+        print(f"Bot response: {response[:100]}...")
         
         # Clean up uploaded images after processing (optional)
         # TODO: Decide retention policy for uploaded images
