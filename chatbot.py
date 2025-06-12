@@ -30,13 +30,15 @@ class ChatBot:
     def _init_openai(self):
         """Initialize OpenAI API client"""
         try:
-            api_key = os.environ['OPENAI_API_KEY']
+            api_key = os.environ.get('OPENAI_API_KEY')
+            print(f"API key found: {bool(api_key)}")
             if not api_key:
                 print("Warning: OPENAI_API_KEY not found. Falling back to rule-based responses.")
                 self._init_rule_based()
                 self.model_type = 'rule_based'
             else:
                 self.client = OpenAI(api_key=api_key)
+                print("OpenAI client initialized successfully")
         except Exception as e:
             print(f"OpenAI initialization error: {e}. Falling back to rule-based.")
             self._init_rule_based()
@@ -110,6 +112,11 @@ class ChatBot:
             str: GPT-3.5 response
         """
         try:
+            print(f"Sending message to OpenAI: {message[:50]}...")
+            if not hasattr(self, 'client'):
+                print("OpenAI client not initialized, using rule-based response")
+                return self._get_rule_based_response(message)
+                
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -119,10 +126,13 @@ class ChatBot:
                 max_tokens=150,
                 temperature=0.7
             )
-            return response.choices[0].message.content.strip()
+            result = response.choices[0].message.content.strip()
+            print(f"OpenAI response received: {result[:50]}...")
+            return result
         
         except Exception as e:
             print(f"OpenAI API error: {e}")
+            print(f"Error type: {type(e).__name__}")
             # Fallback to rule-based response
             return self._get_rule_based_response(message)
     
