@@ -1,40 +1,47 @@
 
+import os
+import openai
+from typing import Optional, List
 import random
 import re
-from typing import Optional
 
 class ChatBot:
     """
-    Modular chatbot class that can be easily extended to use different models.
-    Currently implements rule-based responses, but can be switched to:
-    - OpenAI API (if free tier available)
-    - Local models via llama.cpp
-    - HuggingFace transformers
-    - Any other chat model API
+    Modular chatbot class with OpenAI GPT-3.5 integration and placeholder for local image processing.
     """
     
-    def __init__(self, model_type='rule_based'):
+    def __init__(self, model_type='openai'):
         """
         Initialize chatbot with specified model type
         
         Args:
-            model_type (str): Type of model to use ('rule_based', 'openai', 'local', etc.)
+            model_type (str): Type of model to use ('openai', 'rule_based')
         """
         self.model_type = model_type
         self._init_model()
     
     def _init_model(self):
         """Initialize the selected model"""
-        if self.model_type == 'rule_based':
-            self._init_rule_based()
-        elif self.model_type == 'openai':
+        if self.model_type == 'openai':
             self._init_openai()
-        elif self.model_type == 'local':
-            self._init_local_model()
-        # Add more model types as needed
+        else:
+            self._init_rule_based()
+    
+    def _init_openai(self):
+        """Initialize OpenAI API client"""
+        try:
+            openai.api_key = os.getenv('OPENAI_API_KEY')
+            if not openai.api_key:
+                print("Warning: OPENAI_API_KEY not found. Falling back to rule-based responses.")
+                self._init_rule_based()
+                self.model_type = 'rule_based'
+        except Exception as e:
+            print(f"OpenAI initialization error: {e}. Falling back to rule-based.")
+            self._init_rule_based()
+            self.model_type = 'rule_based'
     
     def _init_rule_based(self):
-        """Initialize rule-based response patterns"""
+        """Initialize rule-based response patterns (fallback)"""
         self.responses = {
             'greeting': [
                 "Hello! How can I help you today?",
@@ -55,7 +62,7 @@ class ChatBot:
                 "Farewell! Hope to chat again soon!"
             ],
             'help': [
-                "I'm here to help! You can ask me questions, have a conversation, or even upload images (though I can't process them yet).",
+                "I'm here to help! You can ask me questions, have a conversation, or even upload images.",
                 "I can chat with you about various topics. What would you like to talk about?",
                 "Feel free to ask me anything! I'm here to assist and chat with you."
             ],
@@ -64,9 +71,7 @@ class ChatBot:
                 "I see. What else would you like to discuss?",
                 "Thanks for sharing! Is there anything specific you'd like to know?",
                 "Hmm, that's a good point. What are your thoughts on that?",
-                "I understand. How can I help you with that?",
-                "That sounds important to you. Can you elaborate?",
-                "Interesting perspective! What made you think about that?"
+                "I understand. How can I help you with that?"
             ]
         }
         
@@ -77,64 +82,59 @@ class ChatBot:
             'help': r'\b(help|assist|support|what can you do|capabilities)\b'
         }
     
-    def _init_openai(self):
+    def get_bot_response(self, message: str) -> str:
         """
-        Initialize OpenAI API (free tier if available)
-        TODO: Implement OpenAI integration
-        """
-        try:
-            # import openai
-            # self.openai_client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-            print("OpenAI model initialization - TODO: Implement")
-            # Fallback to rule-based for now
-            self._init_rule_based()
-        except ImportError:
-            print("OpenAI package not installed. Falling back to rule-based.")
-            self._init_rule_based()
-    
-    def _init_local_model(self):
-        """
-        Initialize local model (llama.cpp, HuggingFace, etc.)
-        TODO: Implement local model integration
-        """
-        try:
-            # Example for HuggingFace transformers:
-            # from transformers import pipeline
-            # self.generator = pipeline('text-generation', model='microsoft/DialoGPT-medium')
-            print("Local model initialization - TODO: Implement")
-            # Fallback to rule-based for now
-            self._init_rule_based()
-        except ImportError:
-            print("Required packages for local model not installed. Falling back to rule-based.")
-            self._init_rule_based()
-    
-    def get_response(self, message: str, image_path: Optional[str] = None) -> str:
-        """
-        Get chatbot response for given message and optional image
+        Main function to get chatbot response for text messages
         
         Args:
             message (str): User message
-            image_path (str, optional): Path to uploaded image file
             
         Returns:
             str: Chatbot response
         """
-        if self.model_type == 'rule_based':
-            return self._get_rule_based_response(message, image_path)
-        elif self.model_type == 'openai':
-            return self._get_openai_response(message, image_path)
-        elif self.model_type == 'local':
-            return self._get_local_response(message, image_path)
+        if self.model_type == 'openai':
+            return self._get_openai_response(message)
         else:
-            return "Sorry, I'm not configured properly. Please try again."
+            return self._get_rule_based_response(message)
     
-    def _get_rule_based_response(self, message: str, image_path: Optional[str] = None) -> str:
-        """Generate rule-based response"""
-        message_lower = message.lower()
+    def _get_openai_response(self, message: str) -> str:
+        """
+        Get response from OpenAI GPT-3.5 API
         
-        # Handle image if provided
-        if image_path:
-            return f"I can see you've uploaded an image! Unfortunately, I can't process images yet, but I received your message: '{message}'. Image processing is coming soon!"
+        Args:
+            message (str): User message
+            
+        Returns:
+            str: GPT-3.5 response
+        """
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful, friendly AI assistant. Be conversational and engaging."},
+                    {"role": "user", "content": message}
+                ],
+                max_tokens=150,
+                temperature=0.7
+            )
+            return response.choices[0].message.content.strip()
+        
+        except Exception as e:
+            print(f"OpenAI API error: {e}")
+            # Fallback to rule-based response
+            return self._get_rule_based_response(message)
+    
+    def _get_rule_based_response(self, message: str) -> str:
+        """
+        Generate rule-based response (fallback)
+        
+        Args:
+            message (str): User message
+            
+        Returns:
+            str: Rule-based response
+        """
+        message_lower = message.lower()
         
         # Check for patterns
         for intent, pattern in self.patterns.items():
@@ -144,39 +144,55 @@ class ChatBot:
         # Default response
         return random.choice(self.responses['default'])
     
-    def _get_openai_response(self, message: str, image_path: Optional[str] = None) -> str:
+    def process_images(self, image_paths: List[str]) -> str:
         """
-        Get response from OpenAI API
-        TODO: Implement OpenAI integration
-        """
-        # Placeholder implementation
-        try:
-            # Example OpenAI call:
-            # response = self.openai_client.chat.completions.create(
-            #     model="gpt-3.5-turbo",  # Use free tier model if available
-            #     messages=[{"role": "user", "content": message}]
-            # )
-            # return response.choices[0].message.content
+        Process uploaded images using local model (placeholder for future implementation)
+        
+        Args:
+            image_paths (List[str]): List of paths to uploaded image files
             
-            # For now, fallback to rule-based
-            return self._get_rule_based_response(message, image_path)
-        except Exception as e:
-            print(f"OpenAI API error: {e}")
-            return self._get_rule_based_response(message, image_path)
+        Returns:
+            str: Summary or description of processed images
+        """
+        # TODO: Implement local model image processing here
+        # This function will:
+        # 1. Load and preprocess images from image_paths
+        # 2. Run local model inference (e.g., llama.cpp, HuggingFace)
+        # 3. Generate descriptions/analysis of the images
+        # 4. Return summary that can be sent to GPT-3.5 for conversational response
+        
+        if len(image_paths) == 0:
+            return ""
+        
+        # Placeholder response for now
+        image_count = len(image_paths)
+        if image_count == 1:
+            return f"I can see you've uploaded an image! Image processing with local models is coming soon. For now, I can chat with you about anything else."
+        else:
+            return f"I can see you've uploaded {image_count} images! Batch image processing with local models is coming soon. For now, I can chat with you about anything else."
     
-    def _get_local_response(self, message: str, image_path: Optional[str] = None) -> str:
+    def get_response(self, message: str, image_paths: Optional[List[str]] = None) -> str:
         """
-        Get response from local model
-        TODO: Implement local model integration
-        """
-        # Placeholder implementation
-        try:
-            # Example for local model:
-            # response = self.generator(message, max_length=100, num_return_sequences=1)
-            # return response[0]['generated_text']
+        Combined response function that handles both text and images
+        
+        Args:
+            message (str): User message
+            image_paths (Optional[List[str]]): List of uploaded image file paths
             
-            # For now, fallback to rule-based
-            return self._get_rule_based_response(message, image_path)
-        except Exception as e:
-            print(f"Local model error: {e}")
-            return self._get_rule_based_response(message, image_path)
+        Returns:
+            str: Combined chatbot response
+        """
+        # Process images if provided
+        image_context = ""
+        if image_paths and len(image_paths) > 0:
+            image_context = self.process_images(image_paths)
+        
+        # Get text response
+        if image_context:
+            # If we have image context, combine it with the user message for GPT
+            combined_message = f"User message: {message}\n\nImage context: {image_context}"
+            text_response = self.get_bot_response(combined_message)
+        else:
+            text_response = self.get_bot_response(message)
+        
+        return text_response

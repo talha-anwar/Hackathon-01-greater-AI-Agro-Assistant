@@ -16,8 +16,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize chatbot
-chatbot = ChatBot()
+# Initialize chatbot with OpenAI
+chatbot = ChatBot(model_type='openai')
 
 def allowed_file(filename):
     """Check if uploaded file has allowed extension"""
@@ -34,7 +34,7 @@ def chat():
     """
     API endpoint for chat messages
     Accepts JSON: {"message": "user message"}
-    Or multipart form data with optional image file
+    Or multipart form data with optional image file(s)
     Returns JSON: {"response": "bot response"}
     """
     try:
@@ -42,32 +42,35 @@ def chat():
         if request.is_json:
             data = request.get_json()
             user_message = data.get('message', '')
-            image_path = None
+            image_paths = []
         else:
             user_message = request.form.get('message', '')
-            image_path = None
+            image_paths = []
             
-            # Handle image upload if present
+            # Handle image upload(s) if present
             if 'image' in request.files:
-                file = request.files['image']
-                if file and file.filename != '' and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    # Add timestamp to avoid conflicts
-                    import time
-                    filename = f"{int(time.time())}_{filename}"
-                    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(image_path)
+                files = request.files.getlist('image')
+                for file in files:
+                    if file and file.filename != '' and allowed_file(file.filename):
+                        filename = secure_filename(file.filename)
+                        # Add timestamp to avoid conflicts
+                        import time
+                        filename = f"{int(time.time())}_{filename}"
+                        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        file.save(image_path)
+                        image_paths.append(image_path)
         
         if not user_message.strip():
             return jsonify({'error': 'Message cannot be empty'}), 400
         
-        # Get chatbot response
-        response = chatbot.get_response(user_message, image_path)
+        # Get chatbot response with image support
+        response = chatbot.get_response(user_message, image_paths if image_paths else None)
         
-        # Clean up uploaded image (optional - you might want to keep them)
-        if image_path and os.path.exists(image_path):
-            # TODO: Decide if you want to keep images or delete them immediately
-            pass  # os.remove(image_path)
+        # Clean up uploaded images after processing (optional)
+        # TODO: Decide retention policy for uploaded images
+        # for image_path in image_paths:
+        #     if os.path.exists(image_path):
+        #         os.remove(image_path)
         
         return jsonify({'response': response})
     
@@ -77,7 +80,11 @@ def chat():
 @app.route('/health')
 def health():
     """Health check endpoint for deployment"""
-    return jsonify({'status': 'healthy'})
+    return jsonify({
+        'status': 'healthy',
+        'model_type': chatbot.model_type,
+        'openai_configured': bool(os.getenv('OPENAI_API_KEY'))
+    })
 
 if __name__ == '__main__':
     # Use port 5000 as recommended for Replit
