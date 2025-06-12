@@ -28,19 +28,22 @@ class ChatBot:
             self._init_rule_based()
     
     def _init_openai(self):
-        """Initialize OpenAI API client"""
+        """Initialize OpenRouter API client"""
         try:
-            api_key = os.environ.get('OPENAI_API_KEY')
-            print(f"API key found: {bool(api_key)}")
+            api_key = os.environ.get('OPENROUTER_API_KEY')
+            print(f"OpenRouter API key found: {bool(api_key)}")
             if not api_key:
-                print("Warning: OPENAI_API_KEY not found. Falling back to rule-based responses.")
+                print("Warning: OPENROUTER_API_KEY not found. Falling back to rule-based responses.")
                 self._init_rule_based()
                 self.model_type = 'rule_based'
             else:
-                self.client = OpenAI(api_key=api_key)
-                print("OpenAI client initialized successfully")
+                self.client = OpenAI(
+                    base_url="https://openrouter.ai/api/v1",
+                    api_key=api_key
+                )
+                print("OpenRouter client initialized successfully")
         except Exception as e:
-            print(f"OpenAI initialization error: {e}. Falling back to rule-based.")
+            print(f"OpenRouter initialization error: {e}. Falling back to rule-based.")
             self._init_rule_based()
             self.model_type = 'rule_based'
     
@@ -103,36 +106,40 @@ class ChatBot:
     
     def _get_openai_response(self, message: str) -> str:
         """
-        Get response from OpenAI GPT-3.5 API
+        Get response from OpenRouter API using DeepSeek model
         
         Args:
             message (str): User message
             
         Returns:
-            str: GPT-3.5 response
+            str: DeepSeek model response via OpenRouter
         """
         try:
-            print(f"Sending message to OpenAI: {message[:50]}...")
+            print(f"Sending message to OpenRouter: {message[:50]}...")
             if not hasattr(self, 'client'):
-                print("OpenAI client not initialized, using rule-based response")
+                print("OpenRouter client not initialized, using rule-based response")
                 return self._get_rule_based_response(message)
                 
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="deepseek/deepseek-r1",
                 messages=[
                     {"role": "system", "content": "You are a helpful, friendly AI assistant. Be conversational and engaging."},
                     {"role": "user", "content": message}
                 ],
                 max_tokens=150,
                 temperature=0.7,
-                timeout=30
+                timeout=30,
+                extra_headers={
+                    "HTTP-Referer": "https://your-repl-url.replit.app",
+                    "X-Title": "Replit Chatbot"
+                }
             )
             result = response.choices[0].message.content.strip()
-            print(f"OpenAI response received: {result[:50]}...")
+            print(f"OpenRouter response received: {result[:50]}...")
             return result
         
         except Exception as e:
-            print(f"OpenAI API error: {e}")
+            print(f"OpenRouter API error: {e}")
             print(f"Error type: {type(e).__name__}")
             print(f"Full error details: {str(e)}")
             
@@ -141,12 +148,12 @@ class ChatBot:
                 print("Authentication error detected, switching to rule-based mode")
                 self._init_rule_based()
                 self.model_type = 'rule_based'
-                return "I'm having trouble with my API configuration. Let me help you with my built-in responses instead!"
+                return "I'm having trouble with my OpenRouter API configuration. Let me help you with my built-in responses instead!"
             elif "quota" in str(e).lower() or "billing" in str(e).lower():
                 print("Quota limit reached, switching to rule-based mode")
                 self._init_rule_based()
                 self.model_type = 'rule_based'
-                return "I've reached my usage limit for now. Don't worry though - I can still chat with you using my built-in responses!"
+                return "I've reached my OpenRouter usage limit for now. Don't worry though - I can still chat with you using my built-in responses!"
             elif "rate limit" in str(e).lower():
                 print("Rate limit detected, switching to rule-based mode temporarily")
                 self._init_rule_based()

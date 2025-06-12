@@ -94,7 +94,7 @@ def health():
     return jsonify({
         'status': 'healthy',
         'model_type': chatbot.model_type,
-        'openai_configured': bool(os.getenv('OPENAI_API_KEY'))
+        'openrouter_configured': bool(os.getenv('OPENROUTER_API_KEY'))
     })
 
 if __name__ == '__main__':
