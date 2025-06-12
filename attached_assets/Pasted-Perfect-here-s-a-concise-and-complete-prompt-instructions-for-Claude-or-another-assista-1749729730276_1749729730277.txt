@@ -1,0 +1,46 @@
+Perfect — here's a concise and complete **prompt** + **instructions** for Claude (or another assistant), tailored to your setup:
+
+---
+
+### 🧠 Claude Prompt for Upgrading Chatbot to GPT-3.5 (with future local model integration)
+
+> Act as a senior Python full-stack developer.
+> My Flask-based chatbot website currently uses rule-based responses. I want to upgrade it to use **OpenAI’s GPT-3.5 via API** for text chatting. In the future, I will also connect a **local model** (e.g. via llama.cpp or HuggingFace) to handle **image input and processing** in batches — that logic will run separately and talk to GPT internally.
+>
+> ---
+>
+> ## 🎯 Immediate Goal:
+>
+> * Replace my rule-based chatbot response with a function that calls **OpenAI’s GPT-3.5** using the `openai` Python library
+> * Use an environment variable (`OPENAI_API_KEY`) to store the API key securely
+> * Keep the system modular — chatbot logic should be in a `chatbot.py` file and easy to expand
+> * All tools must stay free to use (free OpenAI tier is fine for text chat)
+>
+> ---
+>
+> ## 🧩 Future Support:
+>
+> * Prepare a placeholder for **image batch processing via a local model**
+>
+>   * Image files will be uploaded through the UI
+>   * Backend should save the images to a `temp/` or `uploads/` folder
+>   * Mark a TODO spot to run a local model or processing script on the batch
+>   * This processing logic may then **send a summary to GPT-3.5** to include in its response to the user
+>
+> ---
+>
+> ## 🗂️ Output files needed:
+>
+> 1. `chatbot.py`: modular chatbot logic
+>
+>    * `get_bot_response(message: str) -> str`: sends message to GPT
+>    * `process_images(files: List[File]) -> str`: stub that returns placeholder response
+> 2. Updated `app.py`: imports from `chatbot.py`, supports text chat and image upload
+> 3. `index.html`: allows file upload + text input
+> 4. `requirements.txt`: should include `Flask`, `openai`, `flask-cors`, etc.
+>
+> Comment the code clearly and structure it in a way that I can later plug in local inference code into `process_images`.
+
+---
+
+Let me know if you want me to generate this for you right now in Python (code + file structure), but this prompt will guide Claude to generate exactly what you need.
