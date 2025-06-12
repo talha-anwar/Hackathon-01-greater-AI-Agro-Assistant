@@ -30,7 +30,7 @@ class ChatBot:
     def _init_openai(self):
         """Initialize OpenAI API client"""
         try:
-            openai.api_key = os.getenv('OPENAI_API_KEY')
+            openai.api_key = os.environ['OPENAI_API_KEY']
             if not openai.api_key:
                 print("Warning: OPENAI_API_KEY not found. Falling back to rule-based responses.")
                 self._init_rule_based()
