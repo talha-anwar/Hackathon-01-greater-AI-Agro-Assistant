@@ -3,10 +3,10 @@ from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
-from chatbot import ChatBot
+from chatbot import AgriAssistant
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for Android app integration
+CORS(app)  # Enable CORS for mobile app integration
 
 # Configuration
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -16,8 +16,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize chatbot with OpenAI
-chatbot = ChatBot(model_type='openai')
+# Initialize agricultural assistant with OpenRouter/Llama
+agri_assistant = AgriAssistant(model_type='openrouter')
 
 def allowed_file(filename):
     """Check if uploaded file has allowed extension"""
@@ -26,16 +26,16 @@ def allowed_file(filename):
 
 @app.route('/')
 def home():
-    """Serve the main chat interface"""
+    """Serve the main agricultural diagnosis interface"""
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
     """
-    API endpoint for chat messages
-    Accepts JSON: {"message": "user message"}
-    Or multipart form data with optional image file(s)
-    Returns JSON: {"response": "bot response"}
+    API endpoint for agricultural assistance
+    Accepts JSON: {"message": "agricultural query"}
+    Or multipart form data with optional crop image file(s)
+    Returns JSON: {"response": "agricultural assistant response"}
     """
     print(f"=== Received chat request ===")
     print(f"Request method: {request.method}")
@@ -68,14 +68,14 @@ def chat():
         if not user_message.strip():
             return jsonify({'error': 'Message cannot be empty'}), 400
         
-        print(f"User message: {user_message}")
-        print(f"Image paths: {image_paths}")
-        print(f"Chatbot model type: {chatbot.model_type}")
+        print(f"Agricultural query: {user_message}")
+        print(f"Crop image paths: {image_paths}")
+        print(f"Agricultural assistant model type: {agri_assistant.model_type}")
         
-        # Get chatbot response with image support
-        response = chatbot.get_response(user_message, image_paths if image_paths else None)
+        # Get agricultural assistant response with crop image support
+        response = agri_assistant.get_response(user_message, image_paths if image_paths else None)
         
-        print(f"Bot response: {response[:100]}...")
+        print(f"Agricultural assistant response: {response[:100]}...")
         
         # Clean up uploaded images after processing (optional)
         # TODO: Decide retention policy for uploaded images
@@ -93,7 +93,8 @@ def health():
     """Health check endpoint for deployment"""
     return jsonify({
         'status': 'healthy',
-        'model_type': chatbot.model_type,
+        'service': 'AgriDiagnose Assistant',
+        'model_type': agri_assistant.model_type,
         'openrouter_configured': bool(os.getenv('OPENROUTER_API_KEY'))
     })
 

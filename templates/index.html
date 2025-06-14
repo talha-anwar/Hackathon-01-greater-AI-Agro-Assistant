@@ -1,48 +1,115 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot</title>
+    <title>AgriDiagnose - Smart Crop Health Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="chat-container">
-        <header class="chat-header">
-            <h1>🤖 AI Chatbot</h1>
-            <p>Ask me anything or upload an image!</p>
-        </header>
-
-        <div class="chat-messages" id="chatMessages">
-            <div class="message bot-message">
-                <div class="message-content">
-                    <strong>Bot:</strong> Hello! I'm your AI assistant. How can I help you today?
-                </div>
-                <div class="message-time"></div>
+    <!-- Homepage -->
+    <div id="homepage" class="homepage">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h2>🌱 AgriDiagnose</h2>
             </div>
-        </div>
+            <div class="nav-links">
+                <a href="#about">About</a>
+                <a href="#features">Features</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </nav>
 
-        <div class="chat-input-container">
-            <form id="chatForm" enctype="multipart/form-data">
-                <div class="input-row">
-                    <input type="text" id="messageInput" placeholder="Type your message here..." required>
-                    <label for="imageInput" class="file-label" title="Upload Image">
-                        📷
-                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                    </label>
-                    <button type="submit" id="sendButton">Send</button>
+        <main class="hero-section">
+            <div class="hero-content">
+                <h1>Smart Crop Health Diagnosis</h1>
+                <p>Get instant AI-powered insights for your crops and farming challenges. Our advanced agricultural assistant helps you identify plant diseases, nutrient deficiencies, and provides expert farming advice.</p>
+                
+                <div class="hero-buttons">
+                    <button id="startDiagnosis" class="cta-button">
+                        🔍 Start Diagnosis
+                    </button>
+                    <button class="secondary-button">
+                        📚 Learn More
+                    </button>
                 </div>
-                <div id="imagePreview" class="image-preview" style="display: none;">
-                    <img id="previewImg" src="" alt="Preview">
-                    <button type="button" id="removeImage" class="remove-btn">×</button>
+            </div>
+            
+            <div class="hero-image">
+                <div class="plant-icon">🌾</div>
+            </div>
+        </main>
+
+        <section id="features" class="features-section">
+            <h2>Why Choose AgriDiagnose?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔬</div>
+                    <h3>AI-Powered Analysis</h3>
+                    <p>Advanced machine learning models trained on agricultural data to provide accurate diagnoses.</p>
                 </div>
-            </form>
+                <div class="feature-card">
+                    <div class="feature-icon">📷</div>
+                    <h3>Image Recognition</h3>
+                    <p>Upload photos of your crops for instant visual analysis and disease identification.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Expert Consultation</h3>
+                    <p>Chat with our AI assistant for personalized farming advice and solutions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌱</div>
+                    <h3>Sustainable Farming</h3>
+                    <p>Get eco-friendly recommendations that promote sustainable agricultural practices.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Chat Interface (Hidden by default) -->
+    <div id="chatInterface" class="chat-interface" style="display: none;">
+        <div class="chat-container">
+            <header class="chat-header">
+                <button id="backButton" class="back-button">← Back</button>
+                <div class="chat-title">
+                    <h1>🌱 AgriDiagnose Assistant</h1>
+                    <p>Describe your crop issue or upload an image for analysis</p>
+                </div>
+            </header>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <strong>AgriBot:</strong> Hello! I'm your agricultural assistant. I can help diagnose crop diseases, identify nutrient deficiencies, and provide farming advice. How can I help you today?
+                    </div>
+                    <div class="message-time"></div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <form id="chatForm" enctype="multipart/form-data">
+                    <div class="input-row">
+                        <input type="text" id="messageInput" placeholder="Describe your crop issue or ask for farming advice..." required>
+                        <label for="imageInput" class="file-label" title="Upload Crop Image">
+                            📷
+                            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                        </label>
+                        <button type="submit" id="sendButton">Send</button>
+                    </div>
+                    <div id="imagePreview" class="image-preview" style="display: none;">
+                        <img id="previewImg" src="" alt="Preview">
+                        <button type="button" id="removeImage" class="remove-btn">×</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <div id="loadingIndicator" class="loading" style="display: none;">
         <div class="spinner"></div>
-        <span>Thinking...</span>
+        <span>Analyzing...</span>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

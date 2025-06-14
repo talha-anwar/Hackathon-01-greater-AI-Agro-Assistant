@@ -1,5 +1,11 @@
-class ChatBot {
+
+class AgriAssistant {
     constructor() {
+        this.homepage = document.getElementById('homepage');
+        this.chatInterface = document.getElementById('chatInterface');
+        this.startDiagnosisBtn = document.getElementById('startDiagnosis');
+        this.backButton = document.getElementById('backButton');
+        
         this.chatMessages = document.getElementById('chatMessages');
         this.chatForm = document.getElementById('chatForm');
         this.messageInput = document.getElementById('messageInput');
@@ -14,6 +20,11 @@ class ChatBot {
     }
 
     setupEventListeners() {
+        // Navigation
+        this.startDiagnosisBtn.addEventListener('click', () => this.showChatInterface());
+        this.backButton.addEventListener('click', () => this.showHomepage());
+        
+        // Chat functionality
         this.chatForm.addEventListener('submit', (e) => this.handleSubmit(e));
         this.imageInput.addEventListener('change', (e) => this.handleImageSelect(e));
         this.removeImageBtn.addEventListener('click', () => this.removeImage());
@@ -23,6 +34,20 @@ class ChatBot {
             this.messageInput.style.height = 'auto';
             this.messageInput.style.height = this.messageInput.scrollHeight + 'px';
         });
+    }
+
+    showChatInterface() {
+        this.homepage.style.display = 'none';
+        this.chatInterface.style.display = 'block';
+        this.messageInput.focus();
+    }
+
+    showHomepage() {
+        this.chatInterface.style.display = 'none';
+        this.homepage.style.display = 'block';
+        // Clear chat if needed
+        this.messageInput.value = '';
+        this.removeImage();
     }
 
     handleImageSelect(event) {
@@ -71,7 +96,7 @@ class ChatBot {
             }
 
             // Send to backend
-            console.log('Sending message to backend:', message);
+            console.log('Sending agricultural query to assistant:', message);
             const response = await fetch('/chat', {
                 method: 'POST',
                 body: formData
@@ -84,7 +109,7 @@ class ChatBot {
             }
 
             const data = await response.json();
-            console.log('Response data:', data);
+            console.log('Agricultural assistant response:', data);
 
             if (data.error) {
                 throw new Error(data.error);
@@ -94,8 +119,8 @@ class ChatBot {
             this.addMessage(data.response, 'bot');
 
         } catch (error) {
-            console.error('Error:', error);
-            this.addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            console.error('Error communicating with agricultural assistant:', error);
+            this.addMessage('Sorry, I encountered an error while analyzing your request. Please try again or contact our support team.', 'bot');
         } finally {
             this.showLoading(false);
         }
@@ -108,9 +133,11 @@ class ChatBot {
         const now = new Date();
         const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
+        const senderName = sender === 'user' ? 'You' : 'AgriBot';
+
         messageDiv.innerHTML = `
             <div class="message-content">
-                <strong>${sender === 'user' ? 'You' : 'Bot'}:</strong> ${content}
+                <strong>${senderName}:</strong> ${content}
             </div>
             <div class="message-time">${timeString}</div>
         `;
@@ -125,7 +152,7 @@ class ChatBot {
     }
 }
 
-// Wait for DOM to load
+// Initialize the agricultural assistant when DOM loads
 document.addEventListener('DOMContentLoaded', function() {
-    const chatbot = new ChatBot();
+    const agriAssistant = new AgriAssistant();
 });

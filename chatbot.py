@@ -5,35 +5,37 @@ from typing import Optional, List
 import random
 import re
 
-class ChatBot:
+class AgriAssistant:
     """
-    Modular chatbot class with OpenAI GPT-3.5 integration and placeholder for local image processing.
+    Agricultural AI assistant using OpenRouter API with Llama models for crop diagnosis and farming advice.
+    Includes image processing capabilities for plant disease identification.
     """
     
-    def __init__(self, model_type='openai'):
+    def __init__(self, model_type='openrouter'):
         """
-        Initialize chatbot with specified model type
+        Initialize agricultural assistant with specified model type
         
         Args:
-            model_type (str): Type of model to use ('openai', 'rule_based')
+            model_type (str): Type of model to use ('openrouter', 'rule_based')
         """
         self.model_type = model_type
+        self.conversation_history = []  # Track conversation for context
         self._init_model()
     
     def _init_model(self):
         """Initialize the selected model"""
-        if self.model_type == 'openai':
-            self._init_openai()
+        if self.model_type == 'openrouter':
+            self._init_openrouter()
         else:
             self._init_rule_based()
     
-    def _init_openai(self):
-        """Initialize OpenRouter API client"""
+    def _init_openrouter(self):
+        """Initialize OpenRouter API client for Llama models"""
         try:
             api_key = os.environ.get('OPENROUTER_API_KEY')
             print(f"OpenRouter API key found: {bool(api_key)}")
             if not api_key:
-                print("Warning: OPENROUTER_API_KEY not found. Falling back to rule-based responses.")
+                print("Warning: OPENROUTER_API_KEY not found. Falling back to rule-based agricultural responses.")
                 self._init_rule_based()
                 self.model_type = 'rule_based'
             else:
@@ -41,9 +43,9 @@ class ChatBot:
                     base_url="https://openrouter.ai/api/v1",
                     api_key=api_key
                 )
-                print("OpenRouter client initialized successfully")
+                print("OpenRouter client with Llama model initialized successfully for agricultural assistance")
         except Exception as e:
-            print(f"OpenRouter initialization error: {e}. Falling back to rule-based.")
+            print(f"OpenRouter initialization error: {e}. Falling back to agricultural rule-based responses.")
             self._init_rule_based()
             self.model_type = 'rule_based'
     
@@ -51,34 +53,34 @@ class ChatBot:
         """Initialize rule-based response patterns (fallback)"""
         self.responses = {
             'greeting': [
-                "Hello! How can I help you today?",
-                "Hi there! What's on your mind?",
-                "Hey! How's it going?",
-                "Greetings! What would you like to chat about?"
+                "Hello! I'm your agricultural assistant. How can I help with your crops today?",
+                "Hi there! What farming challenge can I help you solve?",
+                "Welcome to AgriDiagnose! How can I assist with your agricultural needs?",
+                "Greetings! I'm here to help with crop diagnosis and farming advice."
             ],
             'how_are_you': [
-                "I'm doing great, thank you for asking!",
-                "I'm fine, thanks! How about you?",
-                "All good here! How can I assist you?",
-                "I'm doing well! What brings you here today?"
+                "I'm doing great and ready to help with your agricultural needs!",
+                "All systems green here! How are your crops doing?",
+                "I'm functioning well! How can I assist with your farming today?",
+                "Ready to help with any agricultural challenges you're facing!"
             ],
             'goodbye': [
-                "Goodbye! Have a great day!",
-                "See you later! Take care!",
-                "Bye! Feel free to come back anytime!",
-                "Farewell! Hope to chat again soon!"
+                "Happy farming! Come back anytime for more agricultural advice!",
+                "Take care of your crops! I'm here whenever you need agricultural support!",
+                "Good luck with your farming! Feel free to return for more diagnosis help!",
+                "Until next time - may your harvests be bountiful!"
             ],
             'help': [
-                "I'm here to help! You can ask me questions, have a conversation, or even upload images.",
-                "I can chat with you about various topics. What would you like to talk about?",
-                "Feel free to ask me anything! I'm here to assist and chat with you."
+                "I'm your agricultural AI assistant! I can help diagnose plant diseases, identify nutrient deficiencies, provide farming advice, and analyze crop images.",
+                "I specialize in crop health diagnosis, pest identification, soil advice, and general farming guidance. What agricultural challenge are you facing?",
+                "Upload crop photos for disease analysis, ask about farming techniques, or get advice on plant nutrition. How can I help your farm today?"
             ],
             'default': [
-                "That's interesting! Tell me more about that.",
-                "I see. What else would you like to discuss?",
-                "Thanks for sharing! Is there anything specific you'd like to know?",
-                "Hmm, that's a good point. What are your thoughts on that?",
-                "I understand. How can I help you with that?"
+                "That's an interesting agricultural observation! Can you tell me more about your crops or farming situation?",
+                "I see. What specific crops or farming challenges would you like help with?",
+                "Thanks for sharing! Are you dealing with any plant diseases, pests, or nutrient issues?",
+                "Interesting farming question! What crops are you growing and what symptoms are you observing?",
+                "I'd love to help with your agricultural needs. Can you describe your crops and any issues you're seeing?"
             ]
         }
         
@@ -86,56 +88,69 @@ class ChatBot:
             'greeting': r'\b(hello|hi|hey|greetings?|good morning|good afternoon|good evening)\b',
             'how_are_you': r'\b(how are you|how\'re you|how do you do|what\'s up|how\'s it going)\b',
             'goodbye': r'\b(bye|goodbye|see you|farewell|take care|gtg|got to go)\b',
-            'help': r'\b(help|assist|support|what can you do|capabilities)\b'
+            'help': r'\b(help|assist|support|what can you do|capabilities|diagnose|disease|pest|crop|plant|farming)\b'
         }
     
     def get_bot_response(self, message: str) -> str:
         """
-        Main function to get chatbot response for text messages
+        Main function to get agricultural assistant response for text messages
         
         Args:
-            message (str): User message
+            message (str): User message about agricultural topics
             
         Returns:
-            str: Chatbot response
+            str: Agricultural assistant response
         """
-        if self.model_type == 'openai':
-            return self._get_openai_response(message)
+        if self.model_type == 'openrouter':
+            return self._get_openrouter_response(message)
         else:
             return self._get_rule_based_response(message)
     
-    def _get_openai_response(self, message: str) -> str:
+    def _get_openrouter_response(self, message: str) -> str:
         """
-        Get response from OpenRouter API using DeepSeek model
+        Get response from OpenRouter API using Llama model for agricultural assistance
         
         Args:
-            message (str): User message
+            message (str): User message about agricultural topics
             
         Returns:
-            str: DeepSeek model response via OpenRouter
+            str: Llama model response via OpenRouter for agricultural guidance
         """
         try:
-            print(f"Sending message to OpenRouter: {message[:50]}...")
+            print(f"Sending agricultural query to OpenRouter Llama model: {message[:50]}...")
             if not hasattr(self, 'client'):
-                print("OpenRouter client not initialized, using rule-based response")
+                print("OpenRouter client not initialized, using agricultural rule-based response")
                 return self._get_rule_based_response(message)
-                
+            
+            # Add current message to conversation history
+            self.conversation_history.append({"role": "user", "content": message})
+            
+            # Keep conversation history manageable (last 10 messages)
+            if len(self.conversation_history) > 10:
+                self.conversation_history = self.conversation_history[-10:]
+            
+            # Build messages with agricultural context
+            messages = [
+                {"role": "system", "content": "You are an expert agricultural AI assistant specializing in crop diagnosis, plant disease identification, pest management, soil health, and farming advice. Provide practical, actionable guidance for farmers and agricultural professionals. Be specific and helpful with agricultural recommendations."}
+            ] + self.conversation_history
+            
             response = self.client.chat.completions.create(
                 model="meta-llama/llama-3.2-3b-instruct:free",
-                messages=[
-                    {"role": "system", "content": "You are a helpful, friendly AI assistant. Be conversational and engaging."},
-                    {"role": "user", "content": message}
-                ],
-                max_tokens=150,
+                messages=messages,
+                max_tokens=200,
                 temperature=0.7,
-                timeout=15,
+                timeout=20,
                 extra_headers={
                     "HTTP-Referer": "https://your-repl-url.replit.app",
-                    "X-Title": "Replit Chatbot"
+                    "X-Title": "AgriDiagnose Assistant"
                 }
             )
             result = response.choices[0].message.content.strip()
-            print(f"OpenRouter response received: {result[:50]}...")
+            
+            # Add assistant response to conversation history
+            self.conversation_history.append({"role": "assistant", "content": result})
+            
+            print(f"OpenRouter Llama agricultural response received: {result[:50]}...")
             return result
         
         except Exception as e:
@@ -145,24 +160,24 @@ class ChatBot:
             
             # Check if it's an authentication error
             if "authentication" in str(e).lower() or "api key" in str(e).lower():
-                print("Authentication error detected, switching to rule-based mode")
+                print("Authentication error detected, switching to agricultural rule-based mode")
                 self._init_rule_based()
                 self.model_type = 'rule_based'
-                return "I'm having trouble with my OpenRouter API configuration. Let me help you with my built-in responses instead!"
+                return "I'm having trouble with my OpenRouter API configuration. Let me help you with my built-in agricultural knowledge instead!"
             elif "quota" in str(e).lower() or "billing" in str(e).lower():
-                print("Quota limit reached, switching to rule-based mode")
+                print("Quota limit reached, switching to agricultural rule-based mode")
                 self._init_rule_based()
                 self.model_type = 'rule_based'
-                return "I've reached my OpenRouter usage limit for now. Don't worry though - I can still chat with you using my built-in responses!"
+                return "I've reached my OpenRouter usage limit for now. Don't worry though - I can still provide agricultural advice using my built-in farming knowledge!"
             elif "rate limit" in str(e).lower():
-                print("Rate limit detected, switching to rule-based mode temporarily")
+                print("Rate limit detected, switching to agricultural rule-based mode temporarily")
                 self._init_rule_based()
-                return "I'm being rate limited at the moment. Here's my response using built-in knowledge: " + self._get_rule_based_response(message)
+                return "I'm being rate limited at the moment. Here's my agricultural advice using built-in knowledge: " + self._get_rule_based_response(message)
             else:
-                print("Unknown error, falling back to rule-based response")
+                print("Unknown error, falling back to agricultural rule-based response")
                 self._init_rule_based()
                 self.model_type = 'rule_based'
-                return "I'm experiencing some technical difficulties, but I can still help you! " + self._get_rule_based_response(message)
+                return "I'm experiencing some technical difficulties, but I can still help with your agricultural needs! " + self._get_rule_based_response(message)
     
     def _get_rule_based_response(self, message: str) -> str:
         """
@@ -184,22 +199,22 @@ class ChatBot:
         # Default response
         return random.choice(self.responses['default'])
     
-    def process_images(self, image_paths: List[str]) -> str:
+    def process_crop_images(self, image_paths: List[str]) -> str:
         """
-        Process uploaded images using local model (placeholder for future implementation)
+        Process uploaded crop images for disease/pest identification (placeholder for future implementation)
         
         Args:
-            image_paths (List[str]): List of paths to uploaded image files
+            image_paths (List[str]): List of paths to uploaded crop image files
             
         Returns:
-            str: Summary or description of processed images
+            str: Agricultural analysis summary of processed crop images
         """
-        # TODO: Implement local model image processing here
+        # TODO: Implement agricultural image processing here
         # This function will:
-        # 1. Load and preprocess images from image_paths
-        # 2. Run local model inference (e.g., llama.cpp, HuggingFace)
-        # 3. Generate descriptions/analysis of the images
-        # 4. Return summary that can be sent to GPT-3.5 for conversational response
+        # 1. Load and preprocess crop images from image_paths
+        # 2. Run agricultural computer vision models for disease/pest detection
+        # 3. Identify plant species, diseases, nutrient deficiencies, pest damage
+        # 4. Return agricultural analysis that can be sent to Llama for detailed recommendations
         
         if len(image_paths) == 0:
             return ""
@@ -207,30 +222,30 @@ class ChatBot:
         # Placeholder response for now
         image_count = len(image_paths)
         if image_count == 1:
-            return f"I can see you've uploaded an image! Image processing with local models is coming soon. For now, I can chat with you about anything else."
+            return f"I can see you've uploaded a crop image! Advanced plant disease detection and analysis is coming soon. For now, please describe what you're observing in your crops and I'll provide agricultural guidance."
         else:
-            return f"I can see you've uploaded {image_count} images! Batch image processing with local models is coming soon. For now, I can chat with you about anything else."
+            return f"I can see you've uploaded {image_count} crop images! Multi-image agricultural analysis is coming soon. Please describe the issues you're seeing in your crops and I'll help with diagnosis and treatment recommendations."
     
     def get_response(self, message: str, image_paths: Optional[List[str]] = None) -> str:
         """
-        Combined response function that handles both text and images
+        Combined response function that handles both agricultural text queries and crop images
         
         Args:
-            message (str): User message
-            image_paths (Optional[List[str]]): List of uploaded image file paths
+            message (str): User message about agricultural topics
+            image_paths (Optional[List[str]]): List of uploaded crop image file paths
             
         Returns:
-            str: Combined chatbot response
+            str: Combined agricultural assistant response
         """
-        # Process images if provided
+        # Process crop images if provided
         image_context = ""
         if image_paths and len(image_paths) > 0:
-            image_context = self.process_images(image_paths)
+            image_context = self.process_crop_images(image_paths)
         
-        # Get text response
+        # Get agricultural text response
         if image_context:
-            # If we have image context, combine it with the user message for GPT
-            combined_message = f"User message: {message}\n\nImage context: {image_context}"
+            # If we have crop image context, combine it with the user message for Llama
+            combined_message = f"Agricultural query: {message}\n\nCrop image context: {image_context}"
             text_response = self.get_bot_response(combined_message)
         else:
             text_response = self.get_bot_response(message)
