@@ -121,14 +121,14 @@ class ChatBot:
                 return self._get_rule_based_response(message)
                 
             response = self.client.chat.completions.create(
-                model="deepseek/deepseek-r1",
+                model="meta-llama/llama-3.2-3b-instruct:free",
                 messages=[
                     {"role": "system", "content": "You are a helpful, friendly AI assistant. Be conversational and engaging."},
                     {"role": "user", "content": message}
                 ],
                 max_tokens=150,
                 temperature=0.7,
-                timeout=30,
+                timeout=15,
                 extra_headers={
                     "HTTP-Referer": "https://your-repl-url.replit.app",
                     "X-Title": "Replit Chatbot"
