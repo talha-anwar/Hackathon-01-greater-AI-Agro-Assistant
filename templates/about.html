@@ -1,27 +1,94 @@
-<!DOCTYPE  html>
+
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About US - AgriDiagnose</title>
+    <title>About Us - AgriDiagnose</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  </head>
-  <body>
+</head>
+<body>
     <nav class="navbar">
-      <div class="nav-brand">
-        <h2>🌱 AgriDiagnose</h2>
-      </div>
-      <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        <a href="/features">Features</a>
-        <a href="/contact">Contact</a>
-      </div>
+        <div class="nav-brand">
+            <h2>🌱 AgriDiagnose</h2>
+        </div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/features">Features</a>
+            <a href="/contact">Contact</a>
+        </div>
     </nav>
-  
-    <main>
-      <h1>About AgriDiagnose</h1>
-      <p>AgriDiagnose is your smart crop health assistant.</p>
+    
+    <main style="padding: 2rem 5%; min-height: 80vh;">
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h1 style="color: var(--primary-green); font-size: 3rem; margin-bottom: 1rem;">About AgriDiagnose</h1>
+                <p style="font-size: 1.2rem; color: var(--text-light); max-width: 600px; margin: 0 auto;">
+                    Empowering farmers worldwide with AI-driven crop health solutions for sustainable agriculture.
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 3rem; align-items: center;">
+                <div>
+                    <h2 style="color: var(--primary-green); margin-bottom: 1rem;">Our Mission</h2>
+                    <p style="line-height: 1.8; color: var(--text-dark); margin-bottom: 1.5rem;">
+                        At AgriDiagnose, we believe that technology should serve humanity's most fundamental need: food security. 
+                        Our mission is to democratize access to agricultural expertise through cutting-edge AI technology.
+                    </p>
+                    <p style="line-height: 1.8; color: var(--text-dark);">
+                        We're bridging the gap between traditional farming wisdom and modern technology, 
+                        making expert crop health diagnosis accessible to farmers of all scales, from smallholder farms to large agricultural operations.
+                    </p>
+                </div>
+                <div style="text-align: center; font-size: 8rem;">
+                    🌾
+                </div>
+            </div>
+
+            <div style="background: var(--bg-green); padding: 3rem; border-radius: 20px; margin-bottom: 3rem;">
+                <h2 style="color: var(--primary-green); text-align: center; margin-bottom: 2rem;">Our Story</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🔬</div>
+                        <h3 style="color: var(--primary-green); margin-bottom: 1rem;">Research-Driven</h3>
+                        <p style="color: var(--text-dark);">
+                            Founded by agricultural scientists and AI researchers, our platform is built on years of research 
+                            and field experience in crop disease identification and sustainable farming practices.
+                        </p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🌍</div>
+                        <h3 style="color: var(--primary-green); margin-bottom: 1rem;">Global Impact</h3>
+                        <p style="color: var(--text-dark);">
+                            With users across 50+ countries, we're helping farmers increase crop yields, 
+                            reduce pesticide use, and implement sustainable farming practices worldwide.
+                        </p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
+                        <h3 style="color: var(--primary-green); margin-bottom: 1rem;">Community-Focused</h3>
+                        <p style="color: var(--text-dark);">
+                            We work closely with farming communities, agricultural universities, and research institutions 
+                            to continuously improve our AI models and provide the most accurate diagnoses.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; background: var(--white); padding: 3rem; border-radius: 20px; box-shadow: 0 10px 30px var(--shadow);">
+                <h2 style="color: var(--primary-green); margin-bottom: 2rem;">Join Our Mission</h2>
+                <p style="font-size: 1.1rem; color: var(--text-dark); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    Whether you're a farmer looking to protect your crops, a researcher advancing agricultural science, 
+                    or an advocate for sustainable farming, we invite you to be part of our growing community.
+                </p>
+                <a href="/" style="background: linear-gradient(135deg, var(--primary-green), var(--light-green)); 
+                   color: var(--white); padding: 1rem 2rem; border-radius: 30px; text-decoration: none; 
+                   font-weight: 600; display: inline-block; transition: transform 0.3s;">
+                    Start Your Diagnosis
+                </a>
+            </div>
+        </div>
     </main>
-  </body>
+</body>
 </html>
