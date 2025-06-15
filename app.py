@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import os
@@ -28,6 +27,21 @@ def allowed_file(filename):
 def home():
     """Serve the main agricultural diagnosis interface"""
     return render_template('index.html')
+
+@app.route('/about')
+def about():
+    """Take user to the about page"""
+    return render_template('about.html')
+
+@app.route('/features')
+def features():
+    """Take user to the features page"""
+    return render_template('features.html')
+
+@app.route('/contact')
+def contact():
+    """Take user to the contact page"""
+    return render_template('contact.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
